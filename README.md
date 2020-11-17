@@ -1,5 +1,6 @@
 install:
 yarn
+yarn build
 
 run:
 yarn start
