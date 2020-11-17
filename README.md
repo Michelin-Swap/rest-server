@@ -1,11 +1,11 @@
-install:
-yarn
-yarn build
+install:  
+yarn  
+yarn build  
 
-run:
-yarn start
+run:  
+yarn start  
 
-api:
+api:  
 
 path: /wasm-transfer
 method: post
