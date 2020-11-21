@@ -10,7 +10,7 @@ import { bech32prefix, httpUrl, mnemonic } from './config';
 
 
 
-const buildWallet = (mnemonic: string, index: number): Promise<Secp256k1HdWallet> => {
+export const buildWallet = (mnemonic: string, index: number): Promise<Secp256k1HdWallet> => {
     return Secp256k1HdWallet.fromMnemonic(mnemonic, makeCosmoshubPath(index), bech32prefix);
 };
 export const getSigningCosmWasmClient = async (): Promise<{client: SigningCosmWasmClient, address: string}> => {
