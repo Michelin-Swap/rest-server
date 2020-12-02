@@ -1,8 +1,10 @@
-import { findSequenceForSignedTx } from '@cosmjs/launchpad';
+import { MsgExecuteContract } from '@cosmjs/cosmwasm';
+import { LcdClient } from '@cosmjs/launchpad';
 import express = require('express');
-import { sign, wasmTransfer } from './services';
-import * as fs from 'fs';
-import { buildWallet } from './utils';
+import { httpUrl } from './config';
+import { get_mnemonic, sign, wasmTransfer } from './services';
+
+import { buildWallet, getSigningCosmWasmClient } from './utils';
 const app: express.Application = express();
 const port = 3000;
 const hostname = '0.0.0.0';
@@ -10,6 +12,22 @@ const hostname = '0.0.0.0';
 app.use(express.json()); // for parsing application/json
 
 app.get('/', (req: any, res: any) => res.send('Hello World!'));
+
+app.post('/new-address', async function (req: any, res: any) {
+  const key_name = req.body['key_name'];
+  const index = req.body['index'];
+  try {
+
+    const mnemonic = await get_mnemonic(key_name);
+    const signer = await buildWallet(mnemonic, index);
+    const [{ address }] = await signer.getAccounts();
+    res.send(JSON.stringify({ result: address }));
+
+  } catch (err) {
+    res.send(JSON.stringify({ error: err }));
+  }
+
+});
 app.post('/sign', async function (req: any, res: any) {
   const msgs = req.body['msg'];
   const key_name = req.body['key_name'];
@@ -17,15 +35,7 @@ app.post('/sign', async function (req: any, res: any) {
   const account_number = req.body['account_number'];
   const sequence = req.body['sequence'];
 
-  let mnemonic: string;
-  try {
-    const keystore = fs.readFileSync(`./src/keys/${key_name}.json`, { encoding: 'utf-8' });
-    const key = JSON.parse(keystore);
-    mnemonic = key.mnemonic;
-
-  } catch (err) {
-    res.send(JSON.stringify({ error: err }));
-  }
+  const mnemonic = await get_mnemonic(key_name);
 
   const signer = await buildWallet(mnemonic, 0);
   const result = await sign(signer, msgs, memo, account_number, sequence);
@@ -33,13 +43,65 @@ app.post('/sign', async function (req: any, res: any) {
   res.send(JSON.stringify({ result: result }));
 });
 
-
 app.post('/wasm-transfer', async function (req: any, res: any) {
 
   const msgs = req.body['msg'];
   const memo = req.body['memo'];
-  const result = await wasmTransfer(msgs, memo);
+  const key_name = req.body['key_name'];
+  const index = req.body['index'] ? req.body['index'] : 0;
+
+  const mnemonic = await get_mnemonic(key_name);
+  const { client, address: sender } = await getSigningCosmWasmClient(mnemonic, index);
+  const result = await wasmTransfer(msgs, memo, client, sender);
   res.send(JSON.stringify(result));
+});
+
+app.get('/wasm-transfer-event', async function (req: any, res: any) {
+  const contractAddress = req.query.contract_address;
+  const fromAddress = req.query.from_address;
+  const toAddress = req.query.to_address;
+  const minHeight = req.query.min_height;
+  const maxHeight = req.query.max_height;
+  const page = req.query.page ? req.query.page : 1;
+  const limit = req.query.limit ? req.query.limit : 10;
+  const client = new LcdClient(httpUrl);
+  let query = `message.action=execute&wasm.action=transfer&wasm.contract_address=${contractAddress}&page=${page}&limit=${limit}`;
+  if (fromAddress !== undefined) {
+    query = `${query}&wasm.from=${fromAddress}`;
+  }
+  if (toAddress !== undefined) {
+    query = `${query}&wasm.to=${toAddress}`;
+  }
+  if (minHeight !== undefined) {
+    query = `${query}&tx.minheight=${minHeight}`;
+  }
+
+  if (maxHeight !== undefined) {
+    query = `${query}&tx.maxheight=${maxHeight}`;
+  }
+
+  console.log(query);
+  const queryResponse = await client.txsQuery(query);
+
+  const items = [];
+  const length = queryResponse.txs.length;
+  for (let i = 0; i < length; i++) {
+    const tx = queryResponse.txs[i];
+    if (tx.code === undefined) {   // 成功状态
+      for (let j = 0; j < tx.tx.value.msg.length; j++) {
+        const msg = tx.tx.value.msg[j];
+        const cata = msg.value;
+        const contract = cata?.contract;
+        const fromAddress = cata?.sender;
+        const toAddress = cata?.msg?.transfer?.recipient;
+        const amount = cata?.msg?.transfer?.amount;
+        items.push({ height: tx.height, txHash: tx.txhash, index: j, contract: contract, fromAddress: fromAddress, toAddress: toAddress, amount: amount, timestamp: tx.timestamp});
+      }
+
+    }
+
+  }
+  res.send(JSON.stringify({ result: { count: queryResponse.count, limit: queryResponse.limit, page_number: queryResponse.page_number, page_total: queryResponse.page_total, total_count: queryResponse.total_count, items: items } }));
 });
 
 app.listen(port, hostname, () => console.log(`Example app listening on port ${port}!`));

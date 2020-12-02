@@ -1,11 +1,12 @@
-import { MsgExecuteContract } from '@cosmjs/cosmwasm';
-import { coins, makeSignDoc, makeStdTx, OfflineSigner, StdFee } from '@cosmjs/launchpad';
-import { chainId } from '../config';
+import * as fs from 'fs';
+import { MsgExecuteContract, SigningCosmWasmClient } from '@cosmjs/cosmwasm';
+import { coins, isBroadcastTxFailure, isBroadcastTxSuccess, makeSignDoc, makeStdTx, OfflineSigner, StdFee } from '@cosmjs/launchpad';
+import { chainId, mnemonic } from '../config';
 import { MsgTransfer } from '../types';
 import { getSigningCosmWasmClient } from '../utils';
 
-export async function signAndBroadcast(msgs: any, memo: string) {
-    const {client, address} = await getSigningCosmWasmClient();
+export async function signAndBroadcast(msgs: any, memo: string, client: SigningCosmWasmClient) {
+
     const fee: StdFee = {
         amount: coins(5000000, 'umdse'),
         gas: '90000000',
@@ -28,17 +29,15 @@ export async function sign(signer: OfflineSigner, msgs: any, memo: string, accou
   return signedTx;
 }
 
-export async function wasmTransfer(wasmMsgs: MsgTransfer[], memo: string) {
+export async function wasmTransfer(wasmMsgs: MsgTransfer[], memo: string, client: SigningCosmWasmClient, sendAddress: string) {
    const msgs = [];
-   const {client, address} = await getSigningCosmWasmClient();
-   const myAddress = address;
 
     for (let i = 0; i < wasmMsgs.length; i++) {
       const wasmMsg = wasmMsgs[i];
       const msg: MsgExecuteContract = {
           type: 'wasm/MsgExecuteContract',
           value: {
-              sender: myAddress,
+              sender: sendAddress,
               contract: wasmMsg.tokenAddress,
               msg: {transfer: { recipient: wasmMsg.toAddress, amount: wasmMsg.amount} },
               sent_funds: [],
@@ -48,16 +47,32 @@ export async function wasmTransfer(wasmMsgs: MsgTransfer[], memo: string) {
 
     }
 
+
     const fee: StdFee = {
       amount: coins(5000000, 'umdse'),
       gas: '90000000',
     };
     try {
       const result = await client.signAndBroadcast(msgs, fee, memo);
+     if (isBroadcastTxSuccess(result)) {
       return {'result': result};
+     }
+     if (isBroadcastTxFailure(result)) {
+       return {'error': result};
+     }
+
     } catch (e) {
       return {'error': e.message};
     }
 
 
 }
+
+
+export  async function get_mnemonic(key_name: string): Promise<string> {
+  const keystore = fs.readFileSync(`./src/keys/${key_name}.json`, { encoding: 'utf-8' });
+  const key = JSON.parse(keystore);
+  const mnemonic = key.mnemonic;
+  return mnemonic;
+}
+
