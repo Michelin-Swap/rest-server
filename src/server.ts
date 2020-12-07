@@ -1,4 +1,4 @@
-import { MsgExecuteContract } from '@cosmjs/cosmwasm';
+
 import { LcdClient } from '@cosmjs/launchpad';
 import express = require('express');
 import { httpUrl } from './config';
@@ -7,7 +7,7 @@ import { get_cw_balance, get_mnemonic, sign, wasmTransfer } from './services';
 import { buildWallet, getSigningCosmWasmClient } from './utils';
 const app: express.Application = express();
 const port = 3000;
-const hostname = '0.0.0.0';
+const hostname = '127.0.0.1';
 
 app.use(express.json()); // for parsing application/json
 
@@ -43,15 +43,19 @@ app.post('/sign', async function (req: any, res: any) {
   res.send(JSON.stringify({ result: result }));
 });
 
-app.post('/wasm-transfer', async function (req: any, res: any) {
+app.post('/wasm-transfer/:key_name/:index', async function (req: any, res: any) {
 
   const msgs = req.body['msg'];
   const memo = req.body['memo'];
-  const key_name = req.body['key_name'];
-  const index = req.body['index'] ? req.body['index'] : 0;
+  const fromAddress = req.body['fromAddress'];
+  const key_name = req.params.key_name;
+  const index = req.params.index;
 
   const mnemonic = await get_mnemonic(key_name);
-  const { client, address: sender } = await getSigningCosmWasmClient(mnemonic, index);
+  const { client, address: sender } = await getSigningCosmWasmClient(mnemonic, Number(index));
+  if (fromAddress !== sender) {
+    res.send(JSON.stringify({error: {msg: `发送地址不正确，助记词的index(${index})的地址是${sender}，提交的fromAddress是${fromAddress}`}}));
+  }
   const result = await wasmTransfer(msgs, memo, client, sender);
   res.send(JSON.stringify(result));
 });

@@ -26,11 +26,11 @@ response:
 
 
 **2. 代币发送**  
-path: /wasm-transfer    
+path: /wasm-transfer/:key_name/:index
 method: post
-request body: {msg:[{}Wasmtransfer],memo,key_name:string,index:number}     
+request body: {msg:[{}Wasmtransfer],memo,fromAddress:string,index:number}     
 
-    curl -X POST "http://localhost:3000/wasm-transfer" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{  \"msg\":  [ {\"toAddress\":\"midas1ln3cxx4h4zn0q8e0wrm8xvr0k4u3jqsyueks8d\",\"tokenAddress\":\"midas18vd8fpwxzck93qlwghaj6arh4p7c5n895h5ptt\",\"amount\":\"20\"},{\"toAddress\":\"midas1d776tau32m3h3edcusudjk27d86h3p0s60hwz3\",\"tokenAddress\":\"midas18vd8fpwxzck93qlwghaj6arh4p7c5n895h5ptt\",\"amount\":\"33333\"} ],  \"memo\":\"\",  \"key_name\":\"default\",\"index\":0}"
+    curl -X POST "http://localhost:3000/wasm-transfer/default/0" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{  \"msg\":  [ {\"toAddress\":\"midas1ln3cxx4h4zn0q8e0wrm8xvr0k4u3jqsyueks8d\",\"tokenAddress\":\"midas18vd8fpwxzck93qlwghaj6arh4p7c5n895h5ptt\",\"amount\":\"20\"},{\"toAddress\":\"midas1d776tau32m3h3edcusudjk27d86h3p0s60hwz3\",\"tokenAddress\":\"midas18vd8fpwxzck93qlwghaj6arh4p7c5n895h5ptt\",\"amount\":\"33333\"} ], \"fromAddress\":\"midas1jp2flp47zz54pddjyxvpz9kj6jnthu5mw27j9w\", \"memo\":\"\"}"
 
 response:
 {"result":{}}|{"error:{}}
@@ -48,6 +48,7 @@ result:{ }
 error: {"height":number,"transactionHash":string,"code":number!=0 }
 
 msg说明：转一笔就是msg里只有一个Wasmtransfer，多笔就是msg里有个个Wasmtransfer。 一个事务里含有多笔交易，hash一个，使用idnex区别开来。
+
 
 
 **3. 签名**  
