@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { MsgExecuteContract, SigningCosmWasmClient } from '@cosmjs/cosmwasm';
-import { coins, isBroadcastTxFailure, isBroadcastTxSuccess, makeSignDoc, makeStdTx, OfflineSigner, StdFee } from '@cosmjs/launchpad';
-import { chainId, mnemonic } from '../config';
+import { CosmWasmClient, MsgExecuteContract, SigningCosmWasmClient } from '@cosmjs/cosmwasm';
+import { BroadcastMode, coins, isBroadcastTxFailure, isBroadcastTxSuccess, makeSignDoc, makeStdTx, OfflineSigner, StdFee } from '@cosmjs/launchpad';
+import { chainId, mnemonic, httpUrl } from '../config';
 import { MsgTransfer } from '../types';
 import { getSigningCosmWasmClient } from '../utils';
 
@@ -55,7 +55,7 @@ export async function wasmTransfer(wasmMsgs: MsgTransfer[], memo: string, client
     try {
       const result = await client.signAndBroadcast(msgs, fee, memo);
      if (isBroadcastTxSuccess(result)) {
-      return {'result': result};
+      return {'result': {transactionHash: result.transactionHash}};
      }
      if (isBroadcastTxFailure(result)) {
        return {'error': result};
@@ -76,3 +76,13 @@ export  async function get_mnemonic(key_name: string): Promise<string> {
   return mnemonic;
 }
 
+
+export async function get_cw_balance(contractAddress: string, address: string ) {
+  const client = new CosmWasmClient(httpUrl, BroadcastMode.Block);
+  const queryMsg = { balance: { address: address } };
+
+  const balanceMsg = await client.queryContractSmart(contractAddress, queryMsg);
+
+  return balanceMsg;
+
+}

@@ -25,23 +25,30 @@ response:
 
 
 
-**1. 代币发送**  
+**2. 代币发送**  
 path: /wasm-transfer    
 method: post
-request body: {msg:[{}Wasmtransfer],memo,key_name:string,index:number}  
+request body: {msg:[{}Wasmtransfer],memo,key_name:string,index:number}     
 
-    curl -X POST "http://localhost:3000/wasm-transfer" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{  \"msg\":  [ {\"toAddress\":\"midas1ln3cxx4h4zn0q8e0wrm8xvr0k4u3jqsyueks8d\",\"tokenAddress\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"amount\":\"20\"},{\"toAddress\":\"midas1d776tau32m3h3edcusudjk27d86h3p0s60hwz3\",\"tokenAddress\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"amount\":\"33333\"} ],  \"memo\":\"\",  \"key_name\":\"default\",\"index\":0}"
+    curl -X POST "http://localhost:3000/wasm-transfer" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{  \"msg\":  [ {\"toAddress\":\"midas1ln3cxx4h4zn0q8e0wrm8xvr0k4u3jqsyueks8d\",\"tokenAddress\":\"midas18vd8fpwxzck93qlwghaj6arh4p7c5n895h5ptt\",\"amount\":\"20\"},{\"toAddress\":\"midas1d776tau32m3h3edcusudjk27d86h3p0s60hwz3\",\"tokenAddress\":\"midas18vd8fpwxzck93qlwghaj6arh4p7c5n895h5ptt\",\"amount\":\"33333\"} ],  \"memo\":\"\",  \"key_name\":\"default\",\"index\":0}"
 
 response:
-{"result":{}}|{"error:""}
+{"result":{}}|{"error:{}}
 
 
 **数据结构：**
 Wasmtransfer: {toAddress:string,tokenAddress:string,amount:string}, // amount= (humanAmount*10**decimals).toString() 
 
+
 toAddress:收款地址 
 tokenAddress: 代币的合约地址 
 amount :  发送代币的数量，(humanAmount*10**decimals).toString()
+
+result:{ } 
+error: {"height":number,"transactionHash":string,"code":number!=0 }
+
+msg说明：转一笔就是msg里只有一个Wasmtransfer，多笔就是msg里有个个Wasmtransfer。 一个事务里含有多笔交易，hash一个，使用idnex区别开来。
+
 
 **3. 签名**  
 path: /sign  
@@ -50,7 +57,7 @@ request: {"msg":[object], "memo":string,"key_name":string,"account_number":strin
 
     curl -X POST "http://localhost:3000/sign" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{  \"msg\": [{\"type\":\"wasm/MsgExecuteContract\",\"value\":{\"sender\":\"midas1jp2flp47zz54pddjyxvpz9kj6jnthu5mw27j9w\",   \"contract\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"msg\":{\"transfer\":{\"recipient\":\"midas1ln3cxx4h4zn0q8e0wrm8xvr0k4u3jqsyueks8d\",\"amount\":\"20\"}},\"sent_funds\":[]}},{\"type\":\"wasm/MsgExecuteContract\",\"value\":{\"sender\":\"midas1jp2flp47zz54pddjyxvpz9kj6jnthu5mw27j9w\",\"contract\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"msg\":{\"transfer\":{\"recipient\":\"midas1d776tau32m3h3edcusudjk27d86h3p0s60hwz3\",\"amount\":\"33333\"}},\"sent_funds\":[]}}] ,  \"key_name\":\"default\",\"account_number\":\"9\",\"sequence\":\"12058\" }"
 
-1. 代币转账事件查询
+**4. 代币转账事件查询**
 path: /wasm-transfer-event
 method:get
 request params: 
@@ -80,6 +87,15 @@ transfer：  //转账记录
 
     curl -X GET "http://localhost:3000/wasm-transfer-event?contract_address=midas1zwr262fppwh9kg35v8sfffec00xt6hxg3esztz" -H  "accept: application/json" -H  "Content-Type: application/json"
 
+**5. 余额查询××
+path: /wasm-balance/:contract/:address
+method: get
+
+contrct: 代币合约地址
+address： 要查询余额的地址
+
+
+
 
 **补充说明：**
 **1.节点搭建：**
@@ -94,6 +110,8 @@ https://cosmos.network/rpc/
 2.  充值监听，可通过 代币转账事件查询 接口， 定时扫描 指定 条件 {区块（min_height，max_height），代币（ contract_address ） 和 （收款地址）to_address} 获取转账到 to_address 地址的交易记录。    
 3.  提现， 通过 代币发送 接口给用户提现。   
 
-5. 在 keys 目录下添加多个助记词文件，每个文件对一个助记词钱包，供不同功能使用。
+4. 在 keys 目录下添加多个助记词文件，每个文件对一个助记词钱包，供不同功能使用。
 
 cac代币合约地址：midas1zwr262fppwh9kg35v8sfffec00xt6hxg3esztz 
+
+

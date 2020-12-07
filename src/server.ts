@@ -2,7 +2,7 @@ import { MsgExecuteContract } from '@cosmjs/cosmwasm';
 import { LcdClient } from '@cosmjs/launchpad';
 import express = require('express');
 import { httpUrl } from './config';
-import { get_mnemonic, sign, wasmTransfer } from './services';
+import { get_cw_balance, get_mnemonic, sign, wasmTransfer } from './services';
 
 import { buildWallet, getSigningCosmWasmClient } from './utils';
 const app: express.Application = express();
@@ -56,6 +56,16 @@ app.post('/wasm-transfer', async function (req: any, res: any) {
   res.send(JSON.stringify(result));
 });
 
+app.get('/wasm-balance/:contract/:address', async function (req: any, res: any) {
+
+  const address = req.params.address;
+  const contract = req.params.contract;
+  const result = await get_cw_balance(contract, address);
+  res.send(JSON.stringify(result));
+});
+
+
+
 app.get('/wasm-transfer-event', async function (req: any, res: any) {
   const contractAddress = req.query.contract_address;
   const fromAddress = req.query.from_address;
@@ -95,7 +105,7 @@ app.get('/wasm-transfer-event', async function (req: any, res: any) {
         const fromAddress = cata?.sender;
         const toAddress = cata?.msg?.transfer?.recipient;
         const amount = cata?.msg?.transfer?.amount;
-        items.push({ height: tx.height, txHash: tx.txhash, index: j, contract: contract, fromAddress: fromAddress, toAddress: toAddress, amount: amount, timestamp: tx.timestamp});
+        items.push({ height: tx.height, txHash: tx.txhash, index: j, contract: contract, fromAddress: fromAddress, toAddress: toAddress, amount: amount, timestamp: tx.timestamp });
       }
 
     }
