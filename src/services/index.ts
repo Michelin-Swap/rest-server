@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 import { CosmWasmClient, MsgExecuteContract, SigningCosmWasmClient } from '@cosmjs/cosmwasm';
-import { BroadcastMode, coins, isBroadcastTxFailure, isBroadcastTxSuccess, makeSignDoc, makeStdTx, OfflineSigner, StdFee } from '@cosmjs/launchpad';
+import { BroadcastMode, coins, isBroadcastTxFailure, isBroadcastTxSuccess, LcdClient, makeSignDoc, makeStdTx, OfflineSigner, StdFee } from '@cosmjs/launchpad';
 import { chainId, mnemonic, httpUrl } from '../config';
 import { MsgTransfer } from '../types';
 import { getSigningCosmWasmClient } from '../utils';
+import { createInterfaceDeclaration } from 'typescript';
 
 export async function signAndBroadcast(msgs: any, memo: string, client: SigningCosmWasmClient) {
 
@@ -85,4 +86,11 @@ export async function get_cw_balance(contractAddress: string, address: string ) 
 
   return balanceMsg;
 
+}
+
+export async function get_transaction(transction: string) {
+  const client = new LcdClient(httpUrl, BroadcastMode.Block);
+   const txsResponse = await client.txById(transction);
+
+  return txsResponse;
 }

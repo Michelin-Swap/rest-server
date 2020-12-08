@@ -2,7 +2,7 @@
 import { LcdClient } from '@cosmjs/launchpad';
 import express = require('express');
 import { httpUrl } from './config';
-import { get_cw_balance, get_mnemonic, sign, wasmTransfer } from './services';
+import { get_cw_balance, get_mnemonic, get_transaction, sign, wasmTransfer } from './services';
 
 import { buildWallet, getSigningCosmWasmClient } from './utils';
 const app: express.Application = express();
@@ -68,6 +68,14 @@ app.get('/wasm-balance/:contract/:address', async function (req: any, res: any) 
   res.send(JSON.stringify(result));
 });
 
+app.get('/txs/:transactionHash', async function (req: any, res: any) {
+
+  const transaction = req.params.transactionHash;
+
+  const result = await get_transaction(transaction);
+
+  res.send(JSON.stringify(result));
+});
 
 
 app.get('/wasm-transfer-event', async function (req: any, res: any) {

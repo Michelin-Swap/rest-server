@@ -85,18 +85,39 @@ transfer：  //转账记录
 }
 
 
-
-    curl -X GET "http://localhost:3000/wasm-transfer-event?contract_address=midas1zwr262fppwh9kg35v8sfffec00xt6hxg3esztz" -H  "accept: application/json" -H  "Content-Type: application/json"
-
-**5. 余额查询××
-path: /wasm-balance/:contract/:address
-method: get
-
-contrct: 代币合约地址
-address： 要查询余额的地址
+    curl -X GET "http://localhost:3000/wasm-transfer-event?contract_address=midas1zwr262fppwh9kg35v8sfffec00xt6hxg3esztz" -H  "accept: application/json" -H  "Content-Type: application/json"  
 
 
+**5. 余额查询**  
+path: /wasm-balance/:contract/:address  
+method: get  
 
+contrct: 代币合约地址  
+address： 要查询余额的地址  
+
+**6. 事务查询**  
+path: /txs/:transactionHash  
+method:get  
+
+respsone:  {  
+  readonly height: string;  
+  readonly txhash: string;  
+  /** 🤷‍♂️ */  
+  readonly codespace?: string;  
+  /** Falsy when transaction execution succeeded. Contains error code on error. */  
+  readonly code?: number;  
+  readonly raw_log: string;  
+  readonly logs?: unknown[];  
+  readonly tx: WrappedStdTx;  
+  /** The gas limit as set by the user */  
+  readonly gas_wanted?: string;  
+  /** The gas used by the execution */  
+  readonly gas_used?: string;  
+  readonly timestamp: string;  
+}  
+
+成功：返回数据结构里，如果code存在并 code >0 ,代表事务执行失败。    
+失败：code==0 代表事务成功，一般成功返回结构体里不含code字段。  
 
 **补充说明：**
 **1.节点搭建：**
