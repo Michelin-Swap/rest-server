@@ -50,8 +50,8 @@ export async function wasmTransfer(wasmMsgs: MsgTransfer[], memo: string, client
 
 
     const fee: StdFee = {
-      amount: coins(5000000, 'umdse'),
-      gas: '90000000',
+      amount: coins(0, 'umdse'),
+      gas: '200000',
     };
     try {
       const result = await client.signAndBroadcast(msgs, fee, memo);

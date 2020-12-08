@@ -14,7 +14,7 @@ export const buildWallet = (mnemonic: string, index: number): Promise<Secp256k1H
     return Secp256k1HdWallet.fromMnemonic(mnemonic, makeCosmoshubPath(index), bech32prefix);
 };
 export const getSigningCosmWasmClient = async (mnemonic: string, index: number): Promise<{client: SigningCosmWasmClient, address: string}> => {
-    const gasPrice = GasPrice.fromString('0umdse');
+    const gasPrice = GasPrice.fromString('1umdse');
     const wallet = await buildWallet(mnemonic, index);
     const [{ address }] = await wallet.getAccounts();
     const senderAddress = address;
