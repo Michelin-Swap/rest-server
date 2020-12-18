@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import { CosmWasmClient, MsgExecuteContract, SigningCosmWasmClient } from '@cosmjs/cosmwasm';
 import { BroadcastMode, coins, isBroadcastTxFailure, isBroadcastTxSuccess, LcdClient, makeSignDoc, makeStdTx, OfflineSigner, StdFee } from '@cosmjs/launchpad';
-import { chainId, mnemonic, httpUrl } from '../config';
+import { chainId, httpUrl } from '../config';
 import { MsgTransfer } from '../types';
-import { getSigningCosmWasmClient } from '../utils';
-import { createInterfaceDeclaration } from 'typescript';
+
 
 export async function signAndBroadcast(msgs: any, memo: string, client: SigningCosmWasmClient) {
 

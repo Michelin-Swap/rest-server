@@ -52,11 +52,26 @@ msg说明：转一笔就是msg里只有一个Wasmtransfer，多笔就是msg里�
 
 
 **3. 签名**  
-path: /sign  
+path: /sign/:key_name  
 
-request: {"msg":[object], "memo":string,"key_name":string,"account_number":string, "sequence":string}   //in body
+request: {"msg":[object], "memo":string,"account_number":string, "sequence":string}   //in body
 
     curl -X POST "http://localhost:3000/sign" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{  \"msg\": [{\"type\":\"wasm/MsgExecuteContract\",\"value\":{\"sender\":\"midas1jp2flp47zz54pddjyxvpz9kj6jnthu5mw27j9w\",   \"contract\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"msg\":{\"transfer\":{\"recipient\":\"midas1ln3cxx4h4zn0q8e0wrm8xvr0k4u3jqsyueks8d\",\"amount\":\"20\"}},\"sent_funds\":[]}},{\"type\":\"wasm/MsgExecuteContract\",\"value\":{\"sender\":\"midas1jp2flp47zz54pddjyxvpz9kj6jnthu5mw27j9w\",\"contract\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"msg\":{\"transfer\":{\"recipient\":\"midas1d776tau32m3h3edcusudjk27d86h3p0s60hwz3\",\"amount\":\"33333\"}},\"sent_funds\":[]}}] ,  \"key_name\":\"default\",\"account_number\":\"9\",\"sequence\":\"12058\" }"
+
+
+
+
+path: /sign 
+
+request: {"msg":[object], "memo":string,"mnemonic":string,"account_number":string, "sequence":string}   //in body
+
+    curl -X POST "http://localhost:3000/sign" -H  "accept: application/json" -H  "Content-Type: application/json" -d "{  \"msg\": [{\"type\":\"wasm/MsgExecuteContract\",\"value\":{\"sender\":\"midas1jp2flp47zz54pddjyxvpz9kj6jnthu5mw27j9w\",   \"contract\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"msg\":{\"transfer\":{\"recipient\":\"midas1ln3cxx4h4zn0q8e0wrm8xvr0k4u3jqsyueks8d\",\"amount\":\"20\"}},\"sent_funds\":[]}},{\"type\":\"wasm/MsgExecuteContract\",\"value\":{\"sender\":\"midas1jp2flp47zz54pddjyxvpz9kj6jnthu5mw27j9w\",\"contract\":\"midas1wgh6adn8geywx0v78zs9azrqtqdegufuhe9kf7\",\"msg\":{\"transfer\":{\"recipient\":\"midas1d776tau32m3h3edcusudjk27d86h3p0s60hwz3\",\"amount\":\"33333\"}},\"sent_funds\":[]}}] ,  \"mnemonic\":\"dynamic forest govern fault woman beef culture canal deny citizen heavy silly option march junior bicycle truth tumble cheese total luxury this glare saddle\",\"account_number\":\"9\",\"sequence\":\"12058\" }"
+
+
+
+
+
+
 
 **4. 代币转账事件查询**
 path: /wasm-transfer-event

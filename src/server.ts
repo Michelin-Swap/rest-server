@@ -1,7 +1,8 @@
+import { LcdClient, Secp256k1HdWallet } from '@cosmjs/launchpad';
 
-import { LcdClient } from '@cosmjs/launchpad';
+
 import express = require('express');
-import { httpUrl } from './config';
+import { bech32prefix, httpUrl } from './config';
 import { get_cw_balance, get_mnemonic, get_transaction, sign, wasmTransfer } from './services';
 
 import { buildWallet, getSigningCosmWasmClient } from './utils';
@@ -28,13 +29,13 @@ app.post('/new-address', async function (req: any, res: any) {
   }
 
 });
-app.post('/sign', async function (req: any, res: any) {
+app.post('/sign/:key_name', async function (req: any, res: any) {
   const msgs = req.body['msg'];
-  const key_name = req.body['key_name'];
   const memo = req.body['memo'];
   const account_number = req.body['account_number'];
   const sequence = req.body['sequence'];
 
+  const key_name = req.params.key_name;
   const mnemonic = await get_mnemonic(key_name);
 
   const signer = await buildWallet(mnemonic, 0);
@@ -42,6 +43,22 @@ app.post('/sign', async function (req: any, res: any) {
 
   res.send(JSON.stringify({ result: result }));
 });
+
+app.post('/sign', async function (req: any, res: any) {
+  const msgs = req.body['msg'];
+  const memo = req.body['memo'];
+  const account_number = req.body['account_number'];
+  const sequence = req.body['sequence'];
+  const mnemonic = req.body['mnemonic'];
+
+  const signer = await buildWallet(mnemonic, 0);
+
+  const result = await sign(signer, msgs, memo, account_number, sequence);
+
+  res.send(JSON.stringify({ result: result }));
+  
+});
+
 
 app.post('/wasm-transfer/:key_name/:index', async function (req: any, res: any) {
 
@@ -52,9 +69,10 @@ app.post('/wasm-transfer/:key_name/:index', async function (req: any, res: any) 
   const index = req.params.index;
 
   const mnemonic = await get_mnemonic(key_name);
+
   const { client, address: sender } = await getSigningCosmWasmClient(mnemonic, Number(index));
   if (fromAddress !== sender) {
-    res.send(JSON.stringify({error: {msg: `发送地址不正确，助记词的index(${index})的地址是${sender}，提交的fromAddress是${fromAddress}`}}));
+    res.send(JSON.stringify({ error: { msg: `发送地址不正确，助记词的index(${index})的地址是${sender}，提交的fromAddress是${fromAddress}` } }));
   }
   const result = await wasmTransfer(msgs, memo, client, sender);
   res.send(JSON.stringify(result));
