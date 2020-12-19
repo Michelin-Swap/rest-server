@@ -50,13 +50,9 @@ app.post('/sign', async function (req: any, res: any) {
   const account_number = req.body['account_number'];
   const sequence = req.body['sequence'];
   const mnemonic = req.body['mnemonic'];
-
   const signer = await buildWallet(mnemonic, 0);
-
   const result = await sign(signer, msgs, memo, account_number, sequence);
-
   res.send(JSON.stringify({ result: result }));
-  
 });
 
 
