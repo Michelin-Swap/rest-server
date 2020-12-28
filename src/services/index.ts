@@ -93,3 +93,10 @@ export async function get_transaction(transction: string) {
 
   return txsResponse;
 }
+
+export async function get_cw20_info(contractAddress:string){
+  var query={token_info:{}}
+  const client = new CosmWasmClient(httpUrl, BroadcastMode.Block);
+  client.queryContractSmart(contractAddress,query)
+
+}

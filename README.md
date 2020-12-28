@@ -117,7 +117,6 @@ method:get
 respsone:  {  
   readonly height: string;  
   readonly txhash: string;  
-  /** 🤷‍♂️ */  
   readonly codespace?: string;  
   /** Falsy when transaction execution succeeded. Contains error code on error. */  
   readonly code?: number;  
@@ -149,6 +148,6 @@ https://cosmos.network/rpc/
 
 4. 在 keys 目录下添加多个助记词文件，每个文件对一个助记词钱包，供不同功能使用。
 
-cac代币合约地址：midas1zwr262fppwh9kg35v8sfffec00xt6hxg3esztz 
+
 
 
